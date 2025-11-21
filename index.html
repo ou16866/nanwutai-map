@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>周五终南山·南五台行动指南</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f0f0; }
+        #map { height: 100vh; width: 100%; z-index: 1; }
+        
+        /* 优化图标样式，确保Emoji居中 */
+        .emoji-icon {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            border: 2px solid white;
+        }
+
+        /* 行程卡片样式 */
+        .info-card {
+            position: absolute;
+            bottom: 30px;
+            left: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 35vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+        .info-card h3 { margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; border-left: 4px solid #0984e3; padding-left: 10px; }
+        .timeline-item { display: flex; margin-bottom: 12px; font-size: 14px; align-items: flex-start; }
+        .time { font-weight: 800; color: #0984e3; min-width: 55px; }
+        .content { color: #636e72; line-height: 1.4; }
+        .note { font-size: 12px; color: #b2bec3; margin-top: 2px;}
+
+        /* 定位按钮 */
+        .locate-btn {
+            position: absolute;
+            bottom: 300px; /* 位于卡片上方 */
+            right: 15px;
+            background: white;
+            border: none;
+            padding: 0;
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .locate-btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+    
+    <button class="locate-btn" onclick="locateUser()" title="我的位置">📍</button>
+
+    <div class="info-card">
+        <h3>📅 11.22 周五行动表</h3>
+        <div class="timeline-item">
+            <div class="time">10:00</div>
+            <div>
+                <div class="content" style="color:#2d3436; font-weight:bold;">🚇 韦曲南B口集合</div>
+                <div class="note">打顺风车前往景区 (约35元)</div>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="time">10:40</div>
+            <div class="content">🎫 抵达买票 / 坐摆渡车</div>
+        </div>
+        <div class="timeline-item">
+            <div class="time">11:30</div>
+            <div class="content">⛰️ 开始爬山 (火龙洞起)</div>
+        </div>
+        <div class="timeline-item">
+            <div class="time">13:30</div>
+            <div>
+                <div class="content" style="color:#d63031; font-weight:bold;">🚩 登顶灵应台 (午餐)</div>
+                <div class="note">注意防风保暖，拍照打卡</div>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="time">15:30</div>
+            <div class="content">📉 原路下山</div>
+        </div>
+        <div class="timeline-item">
+            <div class="time">16:30</div>
+            <div class="content">🚌 坐摆渡车回大门 / 返程</div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // 初始化地图
+        var map = L.map('map', {zoomControl: false}).setView([34.08, 108.96], 11);
+
+        // 使用 CartoDB Voyager 风格 (清新、英文/中文混合，更适合旅游)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap, © CartoDB',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        // 图标定义
+        var createIcon = (emoji) => L.divIcon({
+            html: emoji, 
+            className: 'emoji-icon', 
+            iconSize: [36, 36], 
+            iconAnchor: [18, 18],
+            popupAnchor: [0, -20]
+        });
+
+        // 坐标点 (WGS84近似值)
+        var pts = {
+            weiqu: [34.1565, 108.9460],
+            gate: [34.0210, 108.9720],
+            start: [34.0050, 108.9750],
+            top: [33.9920, 108.9770]
+        };
+
+        // 添加标记
+        L.marker(pts.weiqu, {icon: createIcon('🚇')}).addTo(map).bindPopup("<b>韦曲南站</b><br>集合点");
+        L.marker(pts.gate, {icon: createIcon('🎫')}).addTo(map).bindPopup("<b>景区大门</b><br>换乘摆渡车");
+        L.marker(pts.start, {icon: createIcon('⛰️')}).addTo(map).bindPopup("<b>登山起点</b><br>台阶路开始");
+        L.marker(pts.top, {icon: createIcon('🚩')}).addTo(map).bindPopup("<b>灵应台</b><br>终点");
+
+        // 绘制路线
+        // 1. 打车段 (蓝色虚线)
+        L.polyline([pts.weiqu, [34.10, 108.96], pts.gate], {color: '#0984e3', dashArray: '10,10', weight: 4, opacity: 0.7}).addTo(map);
+        // 2. 摆渡车段 (橙色实线)
+        L.polyline([pts.gate, [34.015, 108.98], pts.start], {color: '#e17055', weight: 5}).addTo(map);
+        // 3. 爬山段 (红色实线)
+        L.polyline([pts.start, pts.top], {color: '#d63031', weight: 5}).addTo(map);
+
+        // 定位功能
+        var userMarker;
+        var locationCircle;
+
+        function locateUser() {
+            // 请求高精度定位
+            map.locate({setView: true, maxZoom: 15, enableHighAccuracy: true});
+        }
+        
+        map.on('locationfound', function(e) {
+            // 如果已经有定位标记，先移除，避免重复
+            if (userMarker) map.removeLayer(userMarker);
+            if (locationCircle) map.removeLayer(locationCircle);
+
+            // 添加新的定位标记和精度圈
+            userMarker = L.marker(e.latlng, {
+                icon: L.divIcon({
+                    html: '🔵',
+                    className: 'emoji-icon',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                })
+            }).addTo(map).bindPopup("你在这里").openPopup();
+            
+            locationCircle = L.circle(e.latlng, {
+                radius: e.accuracy, 
+                color: '#0984e3',
+                fillColor: '#0984e3',
+                fillOpacity: 0.15
+            }).addTo(map);
+        });
+
+        map.on('locationerror', function(e) {
+            alert("无法获取定位。请确保在 Safari 中打开，并允许位置权限。");
+        });
+    </script>
+</body>
+</html>
