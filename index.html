@@ -218,4 +218,22 @@
             .bindPopup("摆渡车路线 (盘山路)");
 
         // 3. 爬山 (红色虚线，模拟小路)
-        L
+        L.polyline(hikePath, {color: '#e74c3c', weight: 4, dashArray: '5, 8'}).addTo(map)
+            .bindPopup("登山步道 (台阶路)");
+
+        // === 定位功能 ===
+        var userMarker, accCircle;
+        function locateUser() {
+            map.locate({setView: true, maxZoom: 15, enableHighAccuracy: true});
+        }
+        map.on('locationfound', function(e) {
+            if(userMarker) map.removeLayer(userMarker);
+            if(accCircle) map.removeLayer(accCircle);
+            userMarker = L.marker(e.latlng, {icon: createIcon('🔵')}).addTo(map).bindPopup("你在这里").openPopup();
+            accCircle = L.circle(e.latlng, {radius: e.accuracy, color: '#0984e3', fillOpacity: 0.1}).addTo(map);
+        });
+        map.on('locationerror', function(e) { alert("无法获取定位，请确保允许权限"); });
+
+    </script>
+</body>
+</html>
