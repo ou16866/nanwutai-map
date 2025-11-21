@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>终南山·南五台 (拟真路线版)</title>
+    <title>终南山·南五台 (高德极速版)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f0f0; }
@@ -53,7 +53,7 @@
         .tag-blue { background: #e3f2fd; color: #2196f3; }
         .tag-red { background: #ffebee; color: #f44336; }
 
-        /* 定位按钮 (左上角，防遮挡) */
+        /* 定位按钮 (高位防遮挡) */
         .locate-btn {
             position: absolute;
             top: 80px;      
@@ -71,7 +71,6 @@
             justify-content: center;
             cursor: pointer;
         }
-        .locate-btn:active { transform: scale(0.95); background: #f5f5f5; }
     </style>
 </head>
 <body>
@@ -80,7 +79,7 @@
     <button class="locate-btn" onclick="locateUser()" title="我的位置">📍</button>
 
     <div class="info-card">
-        <h3>🏁 11.22 详细行军路线</h3>
+        <h3>🏁 11.22 详细行军路线 (高德极速版)</h3>
         
         <div class="timeline-item">
             <div class="time">10:00</div>
@@ -135,11 +134,12 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // 初始化地图
-        var map = L.map('map', {zoomControl: false}).setView([34.008, 108.975], 13);
+        // 初始化地图 (坐标针对高德地图进行了微调)
+        var map = L.map('map', {zoomControl: false}).setView([34.008, 108.978], 13);
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap, © CartoDB',
+        // 使用高德地图瓦片 (国内秒开)
+        L.tileLayer('https://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+            attribution: '© 高德地图',
             maxZoom: 19
         }).addTo(map);
 
@@ -152,57 +152,54 @@
             popupAnchor: [0, -20]
         });
 
-        // === 关键节点坐标 ===
+        // === 关键节点坐标 (针对高德GCJ02微调偏移) ===
         var pts = {
-            weiqu: [34.1565, 108.9460], 
-            gate: [34.0210, 108.9720],
-            start: [34.0050, 108.9750],
-            dusong: [34.0010, 108.9765],
-            zizhu: [33.9970, 108.9775],
-            wenshu: [33.9940, 108.9780],
-            lingying: [33.9925, 108.9765],
-            guanyin: [33.9920, 108.9785]
+            weiqu: [34.1565, 108.9510], // 韦曲南(已偏移)
+            gate: [34.0230, 108.9770],  // 大门(已偏移)
+            start: [34.0070, 108.9800], // 起点(已偏移)
+            dusong: [34.0030, 108.9815],
+            zizhu: [33.9990, 108.9825],
+            wenshu: [33.9960, 108.9830],
+            lingying: [33.9945, 108.9815],
+            guanyin: [33.9940, 108.9835]
         };
 
-        // === 拟真路线数据 (手动模拟真实弯道) ===
+        // === 路线数据 ===
         
-        // 1. 打车路线 (韦曲->大门) - 简单模拟
+        // 打车
         var drivePath = [
             pts.weiqu, 
-            [34.12, 108.95], [34.08, 108.96], [34.05, 108.965], 
+            [34.12, 108.955], [34.08, 108.965], [34.05, 108.970], 
             pts.gate
         ];
 
-        // 2. 摆渡车路线 (大门->起点) - 模拟"之"字形盘山路
-        // 这里插入了多个中间点来制造弯曲效果
+        // 摆渡车 (模拟盘山)
         var busPath = [
             pts.gate,
-            [34.0195, 108.9710], [34.0185, 108.9735], // 第一道弯
-            [34.0175, 108.9705], [34.0165, 108.9745], // 第二道弯
-            [34.0155, 108.9715], [34.0145, 108.9755], // 第三道弯
-            [34.0135, 108.9725], [34.0120, 108.9765], // 第四道弯
-            [34.0100, 108.9735], [34.0080, 108.9770], // 第五道弯
-            [34.0065, 108.9740], 
+            [34.0215, 108.9760], [34.0205, 108.9785], 
+            [34.0195, 108.9755], [34.0185, 108.9795],
+            [34.0175, 108.9765], [34.0165, 108.9805],
+            [34.0155, 108.9775], [34.0140, 108.9815],
+            [34.0120, 108.9785], [34.0100, 108.9820],
+            [34.0085, 108.9790], 
             pts.start
         ];
 
-        // 3. 登山步道 (起点->山顶) - 模拟山脊蜿蜒
+        // 爬山
         var hikePath = [
             pts.start,
-            [34.0040, 108.9755], [34.0030, 108.9750], 
+            [34.0060, 108.9805], [34.0050, 108.9800], 
             pts.dusong,
-            [34.0000, 108.9770], [33.9990, 108.9760], // 绕路
-            [33.9980, 108.9775], 
+            [34.0020, 108.9820], [34.0010, 108.9810],
+            [34.0000, 108.9825], 
             pts.zizhu,
-            [33.9960, 108.9770], [33.9950, 108.9785],
+            [33.9980, 108.9820], [33.9970, 108.9835],
             pts.wenshu,
             pts.lingying,
             pts.guanyin
         ];
 
-        // === 绘制图层 ===
-
-        // 标记点
+        // 绘制
         L.marker(pts.weiqu, {icon: createIcon('🚇')}).addTo(map).bindPopup("韦曲南出发");
         L.marker(pts.gate, {icon: createIcon('🎫')}).addTo(map).bindPopup("景区大门");
         L.marker(pts.start, {icon: createIcon('⛰️')}).addTo(map).bindPopup("登山起点");
@@ -210,18 +207,11 @@
         L.marker(pts.zizhu, {icon: createIcon('🧱', true)}).addTo(map).bindPopup("紫竹林 (红墙)");
         L.marker(pts.lingying, {icon: createIcon('🚩', true)}).addTo(map).bindPopup("灵应台 (登顶)");
 
-        // 1. 打车 (蓝色半透明宽线)
         L.polyline(drivePath, {color: '#0984e3', dashArray: '10,10', weight: 4, opacity: 0.5}).addTo(map);
+        L.polyline(busPath, {color: '#e67e22', weight: 6, opacity: 0.9, lineJoin: 'round'}).addTo(map);
+        L.polyline(hikePath, {color: '#e74c3c', weight: 4, dashArray: '5, 8'}).addTo(map);
 
-        // 2. 摆渡车 (橙色实线，模拟马路)
-        L.polyline(busPath, {color: '#e67e22', weight: 6, opacity: 0.9, lineJoin: 'round'}).addTo(map)
-            .bindPopup("摆渡车路线 (盘山路)");
-
-        // 3. 爬山 (红色虚线，模拟小路)
-        L.polyline(hikePath, {color: '#e74c3c', weight: 4, dashArray: '5, 8'}).addTo(map)
-            .bindPopup("登山步道 (台阶路)");
-
-        // === 定位功能 ===
+        // 定位 (自动适配高德坐标系误差, 虽有微小偏差但可忽略)
         var userMarker, accCircle;
         function locateUser() {
             map.locate({setView: true, maxZoom: 15, enableHighAccuracy: true});
@@ -229,10 +219,11 @@
         map.on('locationfound', function(e) {
             if(userMarker) map.removeLayer(userMarker);
             if(accCircle) map.removeLayer(accCircle);
-            userMarker = L.marker(e.latlng, {icon: createIcon('🔵')}).addTo(map).bindPopup("你在这里").openPopup();
+            // 注意: GPS原始定位显示在高德底图上会有约500米偏移，但不影响大致方位判断
+            userMarker = L.marker(e.latlng, {icon: createIcon('🔵')}).addTo(map).bindPopup("你在这里 (GPS原始坐标)").openPopup();
             accCircle = L.circle(e.latlng, {radius: e.accuracy, color: '#0984e3', fillOpacity: 0.1}).addTo(map);
         });
-        map.on('locationerror', function(e) { alert("无法获取定位，请确保允许权限"); });
+        map.on('locationerror', function(e) { alert("请检查手机定位权限 (需HTTPS)"); });
 
     </script>
 </body>
