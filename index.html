@@ -3,186 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>周五终南山·南五台行动指南</title>
+    <title>终南山·南五台详细作战地图</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f0f0; }
         #map { height: 100vh; width: 100%; z-index: 1; }
         
-        /* 优化图标样式，确保Emoji居中 */
+        /* 图标样式 */
         .emoji-icon {
             display: flex !important;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            background: rgba(255, 255, 255, 0.9);
+            font-size: 22px;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 50%;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            border: 2px solid #fff;
+        }
+        
+        /* 重点突出的图标 */
+        .highlight-icon {
+            background: #fff;
+            border: 3px solid #e17055;
+            font-size: 26px;
+            z-index: 1000 !important;
         }
 
-        /* 行程卡片样式 */
+        /* 行程卡片 */
         .info-card {
             position: absolute;
             bottom: 30px;
-            left: 15px;
-            right: 15px;
-            background: rgba(255, 255, 255, 0.95);
+            left: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(10px);
-            padding: 20px;
+            padding: 15px;
             border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
             z-index: 1000;
             max-height: 35vh;
             overflow-y: auto;
-            transition: all 0.3s ease;
         }
-        .info-card h3 { margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; border-left: 4px solid #0984e3; padding-left: 10px; }
-        .timeline-item { display: flex; margin-bottom: 12px; font-size: 14px; align-items: flex-start; }
-        .time { font-weight: 800; color: #0984e3; min-width: 55px; }
-        .content { color: #636e72; line-height: 1.4; }
-        .note { font-size: 12px; color: #b2bec3; margin-top: 2px;}
+        .info-card h3 { margin: 0 0 12px 0; color: #2c3e50; font-size: 16px; border-left: 4px solid #0984e3; padding-left: 8px; display: flex; justify-content: space-between;}
+        .timeline-item { display: flex; margin-bottom: 10px; font-size: 13px; align-items: flex-start; position: relative; }
+        .timeline-item::before { content: ''; position: absolute; left: 19px; top: 20px; bottom: -12px; width: 2px; background: #f1f2f6; z-index: 0; }
+        .timeline-item:last-child::before { display: none; }
+        .time { font-weight: 800; color: #0984e3; min-width: 45px; z-index: 1; background: white; padding-right: 5px;}
+        .content { color: #2d3436; line-height: 1.4; flex: 1; }
+        .tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; transform: scale(0.9); margin-left: -4px;}
+        .tag-blue { background: #e3f2fd; color: #2196f3; }
+        .tag-red { background: #ffebee; color: #f44336; }
 
         /* 定位按钮 */
         .locate-btn {
             position: absolute;
-            bottom: 300px; /* 位于卡片上方 */
+            bottom: 35vh; 
             right: 15px;
             background: white;
             border: none;
-            padding: 0;
             border-radius: 12px;
             width: 44px;
             height: 44px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 1000;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-size: 20px;
         }
-        .locate-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
     <div id="map"></div>
-    
-    <button class="locate-btn" onclick="locateUser()" title="我的位置">📍</button>
+    <button class="locate-btn" onclick="locateUser()">📍</button>
 
     <div class="info-card">
-        <h3>📅 11.22 周五行动表</h3>
+        <h3>🏁 11.22 详细行军路线 <span style="font-size:12px; font-weight:normal; color:#999">点击地图图标查看详情</span></h3>
+        
         <div class="timeline-item">
             <div class="time">10:00</div>
-            <div>
-                <div class="content" style="color:#2d3436; font-weight:bold;">🚇 韦曲南B口集合</div>
-                <div class="note">打顺风车前往景区 (约35元)</div>
+            <div class="content">
+                <b>韦曲南B口集合</b><br>
+                <span class="tag tag-blue">打车</span> 目标：南五台景区售票处
             </div>
         </div>
+        
         <div class="timeline-item">
             <div class="time">10:40</div>
-            <div class="content">🎫 抵达买票 / 坐摆渡车</div>
-        </div>
-        <div class="timeline-item">
-            <div class="time">11:30</div>
-            <div class="content">⛰️ 开始爬山 (火龙洞起)</div>
-        </div>
-        <div class="timeline-item">
-            <div class="time">13:30</div>
-            <div>
-                <div class="content" style="color:#d63031; font-weight:bold;">🚩 登顶灵应台 (午餐)</div>
-                <div class="note">注意防风保暖，拍照打卡</div>
+            <div class="content">
+                <b>景区大门 (买票)</b><br>
+                <span class="tag tag-blue">摆渡车</span> 坐车20分钟直达半山腰
             </div>
         </div>
+
+        <div class="timeline-item">
+            <div class="time">11:30</div>
+            <div class="content">
+                <b>⛰️ 登山起点 (火龙洞)</b><br>
+                开始爬台阶，前期保存体力
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">12:10</div>
+            <div class="content">
+                <b>⛩️ 独松阁</b><br>
+                第一休息点，补充水分
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">12:50</div>
+            <div class="content">
+                <b>🧱 紫竹林 (红墙)</b><br>
+                <span class="tag tag-red">拍照点</span> 寺庙红墙极美，必拍
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="time">13:30</div>
+            <div class="content">
+                <b>🚩 灵应台/观音台 (登顶)</b><br>
+                <span class="tag tag-red">核心</span> 午餐、云海、大片
+            </div>
+        </div>
+        
         <div class="timeline-item">
             <div class="time">15:30</div>
-            <div class="content">📉 原路下山</div>
-        </div>
-        <div class="timeline-item">
-            <div class="time">16:30</div>
-            <div class="content">🚌 坐摆渡车回大门 / 返程</div>
+            <div class="content"><b>📉 原路下山</b></div>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // 初始化地图
-        var map = L.map('map', {zoomControl: false}).setView([34.08, 108.96], 11);
+        var map = L.map('map', {zoomControl: false}).setView([34.005, 108.975], 13);
 
-        // 使用 CartoDB Voyager 风格 (清新、英文/中文混合，更适合旅游)
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap, © CartoDB',
-            subdomains: 'abcd',
             maxZoom: 19
         }).addTo(map);
 
-        // 图标定义
-        var createIcon = (emoji) => L.divIcon({
+        // 图标生成器
+        var createIcon = (emoji, isHighlight) => L.divIcon({
             html: emoji, 
-            className: 'emoji-icon', 
-            iconSize: [36, 36], 
-            iconAnchor: [18, 18],
+            className: isHighlight ? 'emoji-icon highlight-icon' : 'emoji-icon', 
+            iconSize: isHighlight ? [40, 40] : [30, 30], 
+            iconAnchor: isHighlight ? [20, 20] : [15, 15],
             popupAnchor: [0, -20]
         });
 
-        // 坐标点 (WGS84近似值)
+        // 详细坐标点 (根据真实地形估算)
         var pts = {
-            weiqu: [34.1565, 108.9460],
-            gate: [34.0210, 108.9720],
-            start: [34.0050, 108.9750],
-            top: [33.9920, 108.9770]
+            weiqu: [34.1565, 108.9460], // 韦曲南
+            gate: [34.0210, 108.9720],  // 大门
+            start: [34.0050, 108.9750], // 摆渡车终点/起点
+            dusong: [34.0010, 108.9765], // 独松阁 (半山)
+            zizhu: [33.9970, 108.9775],  // 紫竹林 (高处)
+            wenshu: [33.9940, 108.9780], // 文殊台 (分岔口)
+            lingying: [33.9925, 108.9765], // 灵应台 (最险)
+            guanyin: [33.9920, 108.9785]   // 观音台 (最高)
         };
 
-        // 添加标记
-        L.marker(pts.weiqu, {icon: createIcon('🚇')}).addTo(map).bindPopup("<b>韦曲南站</b><br>集合点");
+        // --- 1. 添加标记 ---
+        L.marker(pts.weiqu, {icon: createIcon('🚇')}).addTo(map).bindPopup("<b>韦曲南</b><br>集合出发");
         L.marker(pts.gate, {icon: createIcon('🎫')}).addTo(map).bindPopup("<b>景区大门</b><br>换乘摆渡车");
-        L.marker(pts.start, {icon: createIcon('⛰️')}).addTo(map).bindPopup("<b>登山起点</b><br>台阶路开始");
-        L.marker(pts.top, {icon: createIcon('🚩')}).addTo(map).bindPopup("<b>灵应台</b><br>终点");
+        L.marker(pts.start, {icon: createIcon('⛰️')}).addTo(map).bindPopup("<b>登山起点</b><br>11:30在此开爬");
+        
+        // 景点标记
+        L.marker(pts.dusong, {icon: createIcon('⛩️')}).addTo(map).bindPopup("<b>独松阁</b><br>休息点 12:10");
+        L.marker(pts.zizhu, {icon: createIcon('🧱', true)}).addTo(map).bindPopup("<b>紫竹林</b><br>必拍红墙 12:50");
+        L.marker(pts.lingying, {icon: createIcon('🚩', true)}).addTo(map).bindPopup("<b>灵应台</b><br>视野之王 13:30");
+        L.marker(pts.guanyin, {icon: createIcon('☁️')}).addTo(map).bindPopup("<b>观音台</b><br>海拔最高点");
 
-        // 绘制路线
-        // 1. 打车段 (蓝色虚线)
-        L.polyline([pts.weiqu, [34.10, 108.96], pts.gate], {color: '#0984e3', dashArray: '10,10', weight: 4, opacity: 0.7}).addTo(map);
-        // 2. 摆渡车段 (橙色实线)
-        L.polyline([pts.gate, [34.015, 108.98], pts.start], {color: '#e17055', weight: 5}).addTo(map);
-        // 3. 爬山段 (红色实线)
-        L.polyline([pts.start, pts.top], {color: '#d63031', weight: 5}).addTo(map);
+        // --- 2. 绘制连线 ---
+        
+        // 蓝色虚线：韦曲 -> 大门 (打车)
+        L.polyline([pts.weiqu, [34.10, 108.96], pts.gate], {color: '#0984e3', dashArray: '8,8', weight: 3, opacity: 0.6}).addTo(map);
+        
+        // 橙色实线：大门 -> 起点 (摆渡车)
+        L.polyline([pts.gate, [34.015, 108.98], pts.start], {color: '#e17055', weight: 4}).addTo(map);
 
-        // 定位功能
-        var userMarker;
-        var locationCircle;
+        // 红色实线：详细登山路径 (连接各个景点)
+        var hikePath = [pts.start, pts.dusong, pts.zizhu, pts.wenshu, pts.lingying, pts.guanyin];
+        L.polyline(hikePath, {color: '#d63031', weight: 5}).addTo(map);
 
+        // --- 3. 定位功能 ---
+        var userMarker, accCircle;
         function locateUser() {
-            // 请求高精度定位
             map.locate({setView: true, maxZoom: 15, enableHighAccuracy: true});
         }
-        
         map.on('locationfound', function(e) {
-            // 如果已经有定位标记，先移除，避免重复
-            if (userMarker) map.removeLayer(userMarker);
-            if (locationCircle) map.removeLayer(locationCircle);
-
-            // 添加新的定位标记和精度圈
-            userMarker = L.marker(e.latlng, {
-                icon: L.divIcon({
-                    html: '🔵',
-                    className: 'emoji-icon',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
-                })
-            }).addTo(map).bindPopup("你在这里").openPopup();
-            
-            locationCircle = L.circle(e.latlng, {
-                radius: e.accuracy, 
-                color: '#0984e3',
-                fillColor: '#0984e3',
-                fillOpacity: 0.15
-            }).addTo(map);
+            if(userMarker) map.removeLayer(userMarker);
+            if(accCircle) map.removeLayer(accCircle);
+            userMarker = L.marker(e.latlng, {icon: createIcon('🔵')}).addTo(map).bindPopup("你在这里").openPopup();
+            accCircle = L.circle(e.latlng, {radius: e.accuracy, color: '#0984e3', fillOpacity: 0.1}).addTo(map);
         });
+        map.on('locationerror', function(e) { alert("无法获取定位，请确保允许权限"); });
 
-        map.on('locationerror', function(e) {
-            alert("无法获取定位。请确保在 Safari 中打开，并允许位置权限。");
-        });
     </script>
 </body>
 </html>
