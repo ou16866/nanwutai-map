@@ -53,7 +53,7 @@
         .tag-blue { background: #e3f2fd; color: #2196f3; }
         .tag-red { background: #ffebee; color: #f44336; }
 
-        /* 定位按钮 (高位防遮挡) */
+        /* 定位按钮 */
         .locate-btn {
             position: absolute;
             top: 80px;      
@@ -79,7 +79,7 @@
     <button class="locate-btn" onclick="locateUser()" title="我的位置">📍</button>
 
     <div class="info-card">
-        <h3>🏁 11.22 详细行军路线 (高德极速版)</h3>
+        <h3>🏁 11.22 详细行军路线 (修复版)</h3>
         
         <div class="timeline-item">
             <div class="time">10:00</div>
@@ -121,7 +121,7 @@
         <div class="timeline-item">
             <div class="time">13:30</div>
             <div class="content">
-                <b>🚩 灵应台/观音台</b><br>
+                <b>🚩 灵应台 / ☁️ 观音台</b><br>
                 <span class="tag tag-red">登顶</span> 午餐、云海
             </div>
         </div>
@@ -134,10 +134,10 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // 初始化地图 (坐标针对高德地图进行了微调)
+        // 初始化地图
         var map = L.map('map', {zoomControl: false}).setView([34.008, 108.978], 13);
 
-        // 使用高德地图瓦片 (国内秒开)
+        // 使用高德地图
         L.tileLayer('https://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
             attribution: '© 高德地图',
             maxZoom: 19
@@ -152,11 +152,11 @@
             popupAnchor: [0, -20]
         });
 
-        // === 关键节点坐标 (针对高德GCJ02微调偏移) ===
+        // === 关键节点坐标 (高德GCJ02) ===
         var pts = {
-            weiqu: [34.1565, 108.9510], // 韦曲南(已偏移)
-            gate: [34.0230, 108.9770],  // 大门(已偏移)
-            start: [34.0070, 108.9800], // 起点(已偏移)
+            weiqu: [34.1565, 108.9510],
+            gate: [34.0230, 108.9770],
+            start: [34.0070, 108.9800],
             dusong: [34.0030, 108.9815],
             zizhu: [33.9990, 108.9825],
             wenshu: [33.9960, 108.9830],
@@ -165,15 +165,12 @@
         };
 
         // === 路线数据 ===
-        
-        // 打车
         var drivePath = [
             pts.weiqu, 
             [34.12, 108.955], [34.08, 108.965], [34.05, 108.970], 
             pts.gate
         ];
 
-        // 摆渡车 (模拟盘山)
         var busPath = [
             pts.gate,
             [34.0215, 108.9760], [34.0205, 108.9785], 
@@ -185,7 +182,6 @@
             pts.start
         ];
 
-        // 爬山
         var hikePath = [
             pts.start,
             [34.0060, 108.9805], [34.0050, 108.9800], 
@@ -199,19 +195,23 @@
             pts.guanyin
         ];
 
-        // 绘制
+        // 绘制图标
         L.marker(pts.weiqu, {icon: createIcon('🚇')}).addTo(map).bindPopup("韦曲南出发");
         L.marker(pts.gate, {icon: createIcon('🎫')}).addTo(map).bindPopup("景区大门");
         L.marker(pts.start, {icon: createIcon('⛰️')}).addTo(map).bindPopup("登山起点");
         L.marker(pts.dusong, {icon: createIcon('⛩️')}).addTo(map).bindPopup("独松阁");
         L.marker(pts.zizhu, {icon: createIcon('🧱', true)}).addTo(map).bindPopup("紫竹林 (红墙)");
-        L.marker(pts.lingying, {icon: createIcon('🚩', true)}).addTo(map).bindPopup("灵应台 (登顶)");
+        
+        // 核心双顶峰
+        L.marker(pts.lingying, {icon: createIcon('🚩', true)}).addTo(map).bindPopup("灵应台 (最险)");
+        L.marker(pts.guanyin, {icon: createIcon('☁️')}).addTo(map).bindPopup("观音台 (最高点 1688m)");
 
+        // 绘制路线
         L.polyline(drivePath, {color: '#0984e3', dashArray: '10,10', weight: 4, opacity: 0.5}).addTo(map);
         L.polyline(busPath, {color: '#e67e22', weight: 6, opacity: 0.9, lineJoin: 'round'}).addTo(map);
         L.polyline(hikePath, {color: '#e74c3c', weight: 4, dashArray: '5, 8'}).addTo(map);
 
-        // 定位 (自动适配高德坐标系误差, 虽有微小偏差但可忽略)
+        // 定位
         var userMarker, accCircle;
         function locateUser() {
             map.locate({setView: true, maxZoom: 15, enableHighAccuracy: true});
@@ -219,11 +219,10 @@
         map.on('locationfound', function(e) {
             if(userMarker) map.removeLayer(userMarker);
             if(accCircle) map.removeLayer(accCircle);
-            // 注意: GPS原始定位显示在高德底图上会有约500米偏移，但不影响大致方位判断
-            userMarker = L.marker(e.latlng, {icon: createIcon('🔵')}).addTo(map).bindPopup("你在这里 (GPS原始坐标)").openPopup();
+            userMarker = L.marker(e.latlng, {icon: createIcon('🔵')}).addTo(map).bindPopup("你在这里").openPopup();
             accCircle = L.circle(e.latlng, {radius: e.accuracy, color: '#0984e3', fillOpacity: 0.1}).addTo(map);
         });
-        map.on('locationerror', function(e) { alert("请检查手机定位权限 (需HTTPS)"); });
+        map.on('locationerror', function(e) { alert("无法获取定位，请检查权限"); });
 
     </script>
 </body>
