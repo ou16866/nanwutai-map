@@ -44,7 +44,7 @@
             max-height: 35vh;
             overflow-y: auto;
         }
-        .info-card h3 { margin: 0 0 12px 0; color: #2c3e50; font-size: 16px; border-left: 4px solid #0984e3; padding-left: 8px; display: flex; justify-content: space-between;}
+        .info-card h3 { margin: 0 0 12px 0; color: #2c3e50; font-size: 16px; border-left: 4px solid #0984e3; padding-left: 8px;}
         .timeline-item { display: flex; margin-bottom: 10px; font-size: 13px; align-items: flex-start; position: relative; }
         .timeline-item::before { content: ''; position: absolute; left: 19px; top: 20px; bottom: -12px; width: 2px; background: #f1f2f6; z-index: 0; }
         .timeline-item:last-child::before { display: none; }
@@ -54,11 +54,11 @@
         .tag-blue { background: #e3f2fd; color: #2196f3; }
         .tag-red { background: #ffebee; color: #f44336; }
 
-        /* 定位按钮 */
+        /* 定位按钮 (已修改到左上角) */
         .locate-btn {
             position: absolute;
-            bottom: 35vh; 
-            right: 15px;
+            top: 20px;       /* 距顶部距离 */
+            left: 20px;      /* 距左侧距离 */
             background: white;
             border: none;
             border-radius: 12px;
@@ -67,16 +67,21 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 1000;
             font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
         }
+        .locate-btn:active { transform: scale(0.95); background: #f5f5f5; }
     </style>
 </head>
 <body>
 
     <div id="map"></div>
-    <button class="locate-btn" onclick="locateUser()">📍</button>
+    <button class="locate-btn" onclick="locateUser()" title="我的位置">📍</button>
 
     <div class="info-card">
-        <h3>🏁 11.22 详细行军路线 <span style="font-size:12px; font-weight:normal; color:#999">点击地图图标查看详情</span></h3>
+        <h3>🏁 11.22 详细行军路线</h3>
         
         <div class="timeline-item">
             <div class="time">10:00</div>
@@ -151,7 +156,7 @@
             popupAnchor: [0, -20]
         });
 
-        // 详细坐标点 (根据真实地形估算)
+        // 详细坐标点
         var pts = {
             weiqu: [34.1565, 108.9460], // 韦曲南
             gate: [34.0210, 108.9720],  // 大门
@@ -163,42 +168,9 @@
             guanyin: [33.9920, 108.9785]   // 观音台 (最高)
         };
 
-        // --- 1. 添加标记 ---
+        // 添加标记
         L.marker(pts.weiqu, {icon: createIcon('🚇')}).addTo(map).bindPopup("<b>韦曲南</b><br>集合出发");
         L.marker(pts.gate, {icon: createIcon('🎫')}).addTo(map).bindPopup("<b>景区大门</b><br>换乘摆渡车");
         L.marker(pts.start, {icon: createIcon('⛰️')}).addTo(map).bindPopup("<b>登山起点</b><br>11:30在此开爬");
         
-        // 景点标记
-        L.marker(pts.dusong, {icon: createIcon('⛩️')}).addTo(map).bindPopup("<b>独松阁</b><br>休息点 12:10");
-        L.marker(pts.zizhu, {icon: createIcon('🧱', true)}).addTo(map).bindPopup("<b>紫竹林</b><br>必拍红墙 12:50");
-        L.marker(pts.lingying, {icon: createIcon('🚩', true)}).addTo(map).bindPopup("<b>灵应台</b><br>视野之王 13:30");
-        L.marker(pts.guanyin, {icon: createIcon('☁️')}).addTo(map).bindPopup("<b>观音台</b><br>海拔最高点");
-
-        // --- 2. 绘制连线 ---
-        
-        // 蓝色虚线：韦曲 -> 大门 (打车)
-        L.polyline([pts.weiqu, [34.10, 108.96], pts.gate], {color: '#0984e3', dashArray: '8,8', weight: 3, opacity: 0.6}).addTo(map);
-        
-        // 橙色实线：大门 -> 起点 (摆渡车)
-        L.polyline([pts.gate, [34.015, 108.98], pts.start], {color: '#e17055', weight: 4}).addTo(map);
-
-        // 红色实线：详细登山路径 (连接各个景点)
-        var hikePath = [pts.start, pts.dusong, pts.zizhu, pts.wenshu, pts.lingying, pts.guanyin];
-        L.polyline(hikePath, {color: '#d63031', weight: 5}).addTo(map);
-
-        // --- 3. 定位功能 ---
-        var userMarker, accCircle;
-        function locateUser() {
-            map.locate({setView: true, maxZoom: 15, enableHighAccuracy: true});
-        }
-        map.on('locationfound', function(e) {
-            if(userMarker) map.removeLayer(userMarker);
-            if(accCircle) map.removeLayer(accCircle);
-            userMarker = L.marker(e.latlng, {icon: createIcon('🔵')}).addTo(map).bindPopup("你在这里").openPopup();
-            accCircle = L.circle(e.latlng, {radius: e.accuracy, color: '#0984e3', fillOpacity: 0.1}).addTo(map);
-        });
-        map.on('locationerror', function(e) { alert("无法获取定位，请确保允许权限"); });
-
-    </script>
-</body>
-</html>
+        L.marker(pts.dusong, {icon: createIcon('⛩️')}).addTo(map
