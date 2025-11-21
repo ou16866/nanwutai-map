@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>终南山·南五台详细作战地图</title>
+    <title>终南山·南五台 (拟真路线版)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f0f0; }
@@ -21,7 +21,6 @@
             border: 2px solid #fff;
         }
         
-        /* 重点突出的图标 */
         .highlight-icon {
             background: #fff;
             border: 3px solid #e17055;
@@ -54,10 +53,10 @@
         .tag-blue { background: #e3f2fd; color: #2196f3; }
         .tag-red { background: #ffebee; color: #f44336; }
 
-        /* 定位按钮 (已大幅下移，避开刘海和标题栏) */
+        /* 定位按钮 (左上角，防遮挡) */
         .locate-btn {
             position: absolute;
-            top: 80px;       /* 改为80px，避开微信顶部栏 */
+            top: 80px;      
             left: 20px;      
             background: white;
             border: none;
@@ -65,7 +64,7 @@
             width: 44px;
             height: 44px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 2000;   /* 提高层级，防止被遮挡 */
+            z-index: 2000; 
             font-size: 20px;
             display: flex;
             align-items: center;
@@ -87,7 +86,7 @@
             <div class="time">10:00</div>
             <div class="content">
                 <b>韦曲南B口集合</b><br>
-                <span class="tag tag-blue">打车</span> 目标：南五台景区售票处
+                <span class="tag tag-blue">打车</span> 约35分钟抵达
             </div>
         </div>
         
@@ -95,7 +94,7 @@
             <div class="time">10:40</div>
             <div class="content">
                 <b>景区大门 (买票)</b><br>
-                <span class="tag tag-blue">摆渡车</span> 坐车20分钟直达半山腰
+                <span class="tag tag-blue">摆渡车</span> 体验盘山公路18弯
             </div>
         </div>
 
@@ -103,31 +102,28 @@
             <div class="time">11:30</div>
             <div class="content">
                 <b>⛰️ 登山起点 (火龙洞)</b><br>
-                开始爬台阶，前期保存体力
+                下车点，开始爬台阶
             </div>
         </div>
 
         <div class="timeline-item">
             <div class="time">12:10</div>
-            <div class="content">
-                <b>⛩️ 独松阁</b><br>
-                第一休息点，补充水分
-            </div>
+            <div class="content"><b>⛩️ 独松阁 (休息)</b></div>
         </div>
 
         <div class="timeline-item">
             <div class="time">12:50</div>
             <div class="content">
-                <b>🧱 紫竹林 (红墙)</b><br>
-                <span class="tag tag-red">拍照点</span> 寺庙红墙极美，必拍
+                <b>🧱 紫竹林 (拍照)</b><br>
+                <span class="tag tag-red">红墙</span> 最佳机位
             </div>
         </div>
 
         <div class="timeline-item">
             <div class="time">13:30</div>
             <div class="content">
-                <b>🚩 灵应台/观音台 (登顶)</b><br>
-                <span class="tag tag-red">核心</span> 午餐、云海、大片
+                <b>🚩 灵应台/观音台</b><br>
+                <span class="tag tag-red">登顶</span> 午餐、云海
             </div>
         </div>
         
@@ -140,7 +136,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // 初始化地图
-        var map = L.map('map', {zoomControl: false}).setView([34.005, 108.975], 13);
+        var map = L.map('map', {zoomControl: false}).setView([34.008, 108.975], 13);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap, © CartoDB',
@@ -156,46 +152,70 @@
             popupAnchor: [0, -20]
         });
 
-        // 详细坐标点
+        // === 关键节点坐标 ===
         var pts = {
-            weiqu: [34.1565, 108.9460], // 韦曲南
-            gate: [34.0210, 108.9720],  // 大门
-            start: [34.0050, 108.9750], // 摆渡车终点/起点
-            dusong: [34.0010, 108.9765], // 独松阁 (半山)
-            zizhu: [33.9970, 108.9775],  // 紫竹林 (高处)
-            wenshu: [33.9940, 108.9780], // 文殊台 (分岔口)
-            lingying: [33.9925, 108.9765], // 灵应台 (最险)
-            guanyin: [33.9920, 108.9785]   // 观音台 (最高)
+            weiqu: [34.1565, 108.9460], 
+            gate: [34.0210, 108.9720],
+            start: [34.0050, 108.9750],
+            dusong: [34.0010, 108.9765],
+            zizhu: [33.9970, 108.9775],
+            wenshu: [33.9940, 108.9780],
+            lingying: [33.9925, 108.9765],
+            guanyin: [33.9920, 108.9785]
         };
 
-        // 添加标记
-        L.marker(pts.weiqu, {icon: createIcon('🚇')}).addTo(map).bindPopup("<b>韦曲南</b><br>集合出发");
-        L.marker(pts.gate, {icon: createIcon('🎫')}).addTo(map).bindPopup("<b>景区大门</b><br>换乘摆渡车");
-        L.marker(pts.start, {icon: createIcon('⛰️')}).addTo(map).bindPopup("<b>登山起点</b><br>11:30在此开爬");
+        // === 拟真路线数据 (手动模拟真实弯道) ===
         
-        L.marker(pts.dusong, {icon: createIcon('⛩️')}).addTo(map).bindPopup("<b>独松阁</b><br>休息点 12:10");
-        L.marker(pts.zizhu, {icon: createIcon('🧱', true)}).addTo(map).bindPopup("<b>紫竹林</b><br>必拍红墙 12:50");
-        L.marker(pts.lingying, {icon: createIcon('🚩', true)}).addTo(map).bindPopup("<b>灵应台</b><br>视野之王 13:30");
-        L.marker(pts.guanyin, {icon: createIcon('☁️')}).addTo(map).bindPopup("<b>观音台</b><br>海拔最高点");
+        // 1. 打车路线 (韦曲->大门) - 简单模拟
+        var drivePath = [
+            pts.weiqu, 
+            [34.12, 108.95], [34.08, 108.96], [34.05, 108.965], 
+            pts.gate
+        ];
 
-        // 绘制连线
-        L.polyline([pts.weiqu, [34.10, 108.96], pts.gate], {color: '#0984e3', dashArray: '8,8', weight: 3, opacity: 0.6}).addTo(map);
-        L.polyline([pts.gate, [34.015, 108.98], pts.start], {color: '#e17055', weight: 4}).addTo(map);
-        L.polyline([pts.start, pts.dusong, pts.zizhu, pts.wenshu, pts.lingying, pts.guanyin], {color: '#d63031', weight: 5}).addTo(map);
+        // 2. 摆渡车路线 (大门->起点) - 模拟"之"字形盘山路
+        // 这里插入了多个中间点来制造弯曲效果
+        var busPath = [
+            pts.gate,
+            [34.0195, 108.9710], [34.0185, 108.9735], // 第一道弯
+            [34.0175, 108.9705], [34.0165, 108.9745], // 第二道弯
+            [34.0155, 108.9715], [34.0145, 108.9755], // 第三道弯
+            [34.0135, 108.9725], [34.0120, 108.9765], // 第四道弯
+            [34.0100, 108.9735], [34.0080, 108.9770], // 第五道弯
+            [34.0065, 108.9740], 
+            pts.start
+        ];
 
-        // 定位功能
-        var userMarker, accCircle;
-        function locateUser() {
-            map.locate({setView: true, maxZoom: 15, enableHighAccuracy: true});
-        }
-        map.on('locationfound', function(e) {
-            if(userMarker) map.removeLayer(userMarker);
-            if(accCircle) map.removeLayer(accCircle);
-            userMarker = L.marker(e.latlng, {icon: createIcon('🔵')}).addTo(map).bindPopup("你在这里").openPopup();
-            accCircle = L.circle(e.latlng, {radius: e.accuracy, color: '#0984e3', fillOpacity: 0.1}).addTo(map);
-        });
-        map.on('locationerror', function(e) { alert("无法获取定位，请确保允许权限"); });
+        // 3. 登山步道 (起点->山顶) - 模拟山脊蜿蜒
+        var hikePath = [
+            pts.start,
+            [34.0040, 108.9755], [34.0030, 108.9750], 
+            pts.dusong,
+            [34.0000, 108.9770], [33.9990, 108.9760], // 绕路
+            [33.9980, 108.9775], 
+            pts.zizhu,
+            [33.9960, 108.9770], [33.9950, 108.9785],
+            pts.wenshu,
+            pts.lingying,
+            pts.guanyin
+        ];
 
-    </script>
-</body>
-</html>
+        // === 绘制图层 ===
+
+        // 标记点
+        L.marker(pts.weiqu, {icon: createIcon('🚇')}).addTo(map).bindPopup("韦曲南出发");
+        L.marker(pts.gate, {icon: createIcon('🎫')}).addTo(map).bindPopup("景区大门");
+        L.marker(pts.start, {icon: createIcon('⛰️')}).addTo(map).bindPopup("登山起点");
+        L.marker(pts.dusong, {icon: createIcon('⛩️')}).addTo(map).bindPopup("独松阁");
+        L.marker(pts.zizhu, {icon: createIcon('🧱', true)}).addTo(map).bindPopup("紫竹林 (红墙)");
+        L.marker(pts.lingying, {icon: createIcon('🚩', true)}).addTo(map).bindPopup("灵应台 (登顶)");
+
+        // 1. 打车 (蓝色半透明宽线)
+        L.polyline(drivePath, {color: '#0984e3', dashArray: '10,10', weight: 4, opacity: 0.5}).addTo(map);
+
+        // 2. 摆渡车 (橙色实线，模拟马路)
+        L.polyline(busPath, {color: '#e67e22', weight: 6, opacity: 0.9, lineJoin: 'round'}).addTo(map)
+            .bindPopup("摆渡车路线 (盘山路)");
+
+        // 3. 爬山 (红色虚线，模拟小路)
+        L
